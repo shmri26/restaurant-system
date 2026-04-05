@@ -6,9 +6,9 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
-const CASHIER_SECRET = process.env.CASHIER_SECRET || 'change_this_secret';
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '6541146086:AAGzdzVDznWSK6J9TGGmQmzpNYhQ10HpxmM';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '1078243046';
+const CASHIER_SECRET = process.env.CASHIER_SECRET |123456| 'change_this_secret';
 
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'database.json');
