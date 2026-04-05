@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>شاشة الكاشير</title>
+  <style>
+    body{margin:0;font-family:system-ui;background:#020617;color:#e5e7eb}
+    .wrap{max-width:1200px;margin:0 auto;padding:20px}
+    .header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:16px}
+    .card{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px}
+    .order{display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);padding:12px 0}
+    .order:last-child{border-bottom:0}
+    .muted{color:#94a3b8}
+    button{padding:10px 14px;border-radius:12px;border:0;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}
+    .done{background:#16a34a}
+    .cancel{background:#dc2626}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div>
+        <h1>شاشة الكاشير</h1>
+        <div class="muted">تحديث تلقائي للطلبات الجديدة</div>
+      </div>
+      <button onclick="reloadNow()">تحديث</button>
+    </div>
+    <div class="grid card">
+      <div id="orders"></div>
+    </div>
+  </div>
+
+  <script>
+    async function loadOrders() {
+      const res = await fetch('/api/orders?status=open');
+      const orders = await res.json();
+      const root = document.getElementById('orders');
+      if (!orders.length) {
+        root.innerHTML = '<div class="muted">لا توجد طلبات حالياً</div>';
+        return;
+      }
+      root.innerHTML = orders.map(o => `
+        <div class="order">
+          <div>
+            <strong>طاولة ${o.table}</strong>
+            <div class="muted">${o.time} · ${o.status}</div>
+            <div class="muted">${o.items.map(i => `${i.name} × ${i.qty}`).join('، ')}</div>
+            ${o.notes ? `<div class="muted">ملاحظات: ${o.notes}</div>` : ''}
+            <div class="muted">الإجمالي: ${Number(o.total).toLocaleString('ar-IQ')} د.ع</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+            <button class="done" onclick="setStatus('${o.id}','done')">تم التجهيز</button>
+            <button class="cancel" onclick="setStatus('${o.id}','cancelled')">إلغاء</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function setStatus(id, status) {
+      await fetch('/api/orders/' + id + '/status', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      loadOrders();
+    }
+
+    function reloadNow() { loadOrders(); }
+
+    loadOrders();
+    setInterval(loadOrders, 3000);
+  </script>
+</body>
+</html>
